@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+    <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Validation.V1.xml">
+    <edmx:Include Alias="Validation" Namespace="Org.OData.Validation.V1"/>
+  </edmx:Reference>
+  <edmx:DataServices>
+    <Schema Namespace="VendorInvoiceService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Annotation Term="Core.Links">
+        <Collection>
+          <Record>
+            <PropertyValue Property="rel" String="author"/>
+            <PropertyValue Property="href" String="https://cap.cloud.sap"/>
+          </Record>
+        </Collection>
+      </Annotation>
+      <EntityContainer Name="EntityContainer">
+        <EntitySet Name="Vendors" EntityType="VendorInvoiceService.Vendors">
+          <NavigationPropertyBinding Path="invoices" Target="Invoices"/>
+        </EntitySet>
+        <EntitySet Name="Invoices" EntityType="VendorInvoiceService.Invoices">
+          <NavigationPropertyBinding Path="vendor" Target="Vendors"/>
+          <NavigationPropertyBinding Path="items" Target="InvoiceItems"/>
+          <NavigationPropertyBinding Path="attachments" Target="Attachments"/>
+          <NavigationPropertyBinding Path="history" Target="ApprovalHistory"/>
+        </EntitySet>
+        <EntitySet Name="InvoiceItems" EntityType="VendorInvoiceService.InvoiceItems">
+          <NavigationPropertyBinding Path="invoice" Target="Invoices"/>
+        </EntitySet>
+        <EntitySet Name="Attachments" EntityType="VendorInvoiceService.Attachments">
+          <NavigationPropertyBinding Path="invoice" Target="Invoices"/>
+        </EntitySet>
+        <EntitySet Name="ApprovalHistory" EntityType="VendorInvoiceService.ApprovalHistory">
+          <NavigationPropertyBinding Path="invoice" Target="Invoices"/>
+        </EntitySet>
+      </EntityContainer>
+      <EntityType Name="Vendors">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="vendorName" Type="Edm.String" MaxLength="100"/>
+        <Property Name="email" Type="Edm.String" MaxLength="100"/>
+        <Property Name="phone" Type="Edm.String" MaxLength="20"/>
+        <Property Name="country" Type="Edm.String" MaxLength="50"/>
+        <Property Name="currency" Type="Edm.String" MaxLength="5"/>
+        <Property Name="taxId" Type="Edm.String" MaxLength="30"/>
+        <Property Name="address" Type="Edm.String" MaxLength="255"/>
+        <Property Name="status" Type="Edm.String"/>
+        <Property Name="manager" Type="Edm.String" MaxLength="100"/>
+        <NavigationProperty Name="invoices" Type="Collection(VendorInvoiceService.Invoices)" Partner="vendor"/>
+      </EntityType>
+      <EntityType Name="Invoices">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="invoiceNumber" Type="Edm.String" MaxLength="30"/>
+        <Property Name="invoiceDate" Type="Edm.Date"/>
+        <Property Name="dueDate" Type="Edm.Date"/>
+        <Property Name="amount" Type="Edm.Decimal" Precision="15" Scale="2"/>
+        <Property Name="currency" Type="Edm.String" MaxLength="5"/>
+        <Property Name="status" Type="Edm.String"/>
+        <NavigationProperty Name="vendor" Type="VendorInvoiceService.Vendors" Partner="invoices">
+          <ReferentialConstraint Property="vendor_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="vendor_ID" Type="Edm.Guid"/>
+        <NavigationProperty Name="items" Type="Collection(VendorInvoiceService.InvoiceItems)" Partner="invoice">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="attachments" Type="Collection(VendorInvoiceService.Attachments)" Partner="invoice">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="history" Type="Collection(VendorInvoiceService.ApprovalHistory)" Partner="invoice">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+      </EntityType>
+      <EntityType Name="InvoiceItems">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="lineNumber" Type="Edm.Int32"/>
+        <Property Name="description" Type="Edm.String" MaxLength="255"/>
+        <Property Name="quantity" Type="Edm.Int32"/>
+        <Property Name="unitPrice" Type="Edm.Decimal" Precision="15" Scale="2"/>
+        <Property Name="totalAmount" Type="Edm.Decimal" Precision="15" Scale="2"/>
+        <NavigationProperty Name="invoice" Type="VendorInvoiceService.Invoices" Partner="items">
+          <ReferentialConstraint Property="invoice_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="invoice_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="Attachments">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="fileName" Type="Edm.String" MaxLength="255"/>
+        <Property Name="fileType" Type="Edm.String" MaxLength="50"/>
+        <Property Name="fileSize" Type="Edm.Int32"/>
+        <NavigationProperty Name="invoice" Type="VendorInvoiceService.Invoices" Partner="attachments">
+          <ReferentialConstraint Property="invoice_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="invoice_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="ApprovalHistory">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="action" Type="Edm.String" MaxLength="20"/>
+        <Property Name="actor" Type="Edm.String" MaxLength="100"/>
+        <Property Name="comments" Type="Edm.String" MaxLength="500"/>
+        <NavigationProperty Name="invoice" Type="VendorInvoiceService.Invoices" Partner="history">
+          <ReferentialConstraint Property="invoice_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="invoice_ID" Type="Edm.Guid"/>
+      </EntityType>
+      <Action Name="SubmitInvoice" IsBound="true">
+        <Parameter Name="in" Type="VendorInvoiceService.Invoices"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Action Name="ApproveInvoice" IsBound="true">
+        <Parameter Name="in" Type="VendorInvoiceService.Invoices"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Action Name="RejectInvoice" IsBound="true">
+        <Parameter Name="in" Type="VendorInvoiceService.Invoices"/>
+        <Parameter Name="comments" Type="Edm.String"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Action Name="SyncVendors" IsBound="true">
+        <Parameter Name="in" Type="VendorInvoiceService.Invoices"/>
+        <ReturnType Type="Edm.String"/>
+      </Action>
+      <Annotations Target="VendorInvoiceService.Vendors/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Vendors/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Vendors/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Vendors/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Vendors/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Vendors/status">
+        <Annotation Term="Validation.AllowedValues">
+          <Collection>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="APPROVED"/>
+              <PropertyValue Property="Value" String="APPROVED"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="PENDING"/>
+              <PropertyValue Property="Value" String="PENDING"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="SUSPENDED"/>
+              <PropertyValue Property="Value" String="SUSPENDED"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Invoices/status">
+        <Annotation Term="Validation.AllowedValues">
+          <Collection>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="DRAFT"/>
+              <PropertyValue Property="Value" String="DRAFT"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="SUBMITTED"/>
+              <PropertyValue Property="Value" String="SUBMITTED"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="APPROVED"/>
+              <PropertyValue Property="Value" String="APPROVED"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="REJECTED"/>
+              <PropertyValue Property="Value" String="REJECTED"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="PAID"/>
+              <PropertyValue Property="Value" String="PAID"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.InvoiceItems/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Attachments/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Attachments/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Attachments/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Attachments/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.Attachments/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.ApprovalHistory/ID">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.ApprovalHistory/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.ApprovalHistory/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.ApprovalHistory/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
+      </Annotations>
+      <Annotations Target="VendorInvoiceService.ApprovalHistory/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="UI.ExcludeFromNavigationContext" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

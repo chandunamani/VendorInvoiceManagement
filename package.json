@@ -1,0 +1,78 @@
+{
+  "name": "VendorInvoiceManagement",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap/cds": "^9",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2.4.0",
+    "@sap/cds-dk": "^9",
+    "cds-plugin-ui5": "^0.17.0",
+    "rimraf": "^5.0.5",
+    "mbt": "^1.2.49"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf",
+    "undeploy": "cf undeploy VendorInvoiceManagement --delete-services --delete-service-keys --delete-service-brokers",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "workspaces": [
+    "app/*"
+  ],
+  "sapux": [
+    "app/invoice-ui"
+  ],
+  "cds": {
+    "fiori": {
+      "direct_crud": true,
+      "draft_messages": false
+    },
+    "requires": {
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "admin": {
+            "password": "admin",
+            "roles": [
+              "Admin",
+              "Viewer",
+              "Approver",
+              "VendorManager"
+            ]
+          },
+          "vendor": {
+            "password": "vendor",
+            "roles": [
+              "VendorManager"
+            ]
+          },
+          "approver": {
+            "password": "approver",
+            "roles": [
+              "Approver"
+            ]
+          },
+          "viewer": {
+            "password": "viewer",
+            "roles": [
+              "Viewer"
+            ]
+          }
+        }
+      },
+      "[production]": {
+        "auth": {
+          "kind": "xsuaa"
+        }
+      },
+      "html5-repo": true,
+      "destinations": true,
+      "workzone": true
+    }
+  }
+}

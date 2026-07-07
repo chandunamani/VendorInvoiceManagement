@@ -1,0 +1,123 @@
+_schema-version: "3.3"
+ID: VendorInvoiceManagement
+version: 1.0.0
+
+modules:
+
+  - name: vendor-invoice-srv
+    type: nodejs
+    path: .
+    parameters:
+      memory: 512M
+      disk-quota: 512M
+    build-parameters:
+      builder: npm
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: vendor-db
+      - name: vendor-xsuaa
+      - name: vendor-destination
+
+  - name: vendor-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: vendor-db
+    parameters:
+      buildpack: nodejs_buildpack
+
+  - name: vendor-invoice-ui
+    type: html5
+    path: app/invoice-ui
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms:
+        []
+
+  - name: vendor-ui-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: vendor-html5-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: vendor-invoice-ui
+          artifacts:
+            - "*.zip"
+          target-path: resources/
+  - name: VendorInvoiceManagement-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: VendorInvoiceManagement-db
+      - name: vendor-db
+      - name: vendor-xsuaa
+
+resources:
+
+  - name: vendor-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  - name: vendor-xsuaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: xs-security.json
+      config:
+        xsappname: VendorInvoiceManagement-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          credential-types:
+            - "binding-secret"
+            - "x509"
+        role-collections:
+          - name: 'Admin (VendorInvoiceManagement ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Admin'
+          - name: 'Approver (VendorInvoiceManagement ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Approver'
+          - name: 'Viewer (VendorInvoiceManagement ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Viewer'
+          - name: 'VendorManager (VendorInvoiceManagement ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.VendorManager'
+
+  - name: vendor-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+
+  - name: vendor-html5-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
